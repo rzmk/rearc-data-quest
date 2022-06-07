@@ -2,7 +2,7 @@
 
 The following are notes/steps I took when exploring [rearc-data/quest](https://github.com/rearc-data/quest). Note that I'm new to some of these technologies and procedures, and that some of these notes may be over-detailed but were useful for my reference while exploring the quest.
 
-## Part 1
+## Part 1: AWS S3 & Sourcing Datasets
 
 > 1. Republish [this open dataset](https://download.bls.gov/pub/time.series/pr/) in Amazon S3 and share with us a link.
 
@@ -62,8 +62,18 @@ Script logic:
     - Do nothing
 - Remove S3 files that don't exist in data source
 
-## Part 2
+## Part 2: APIs
 
-## Part 3
+> 1. Create a script that will fetch data from [this API](https://datausa.io/api/data?drilldowns=Nation&measures=Population). You can read the documentation [here](https://datausa.io/about/api/)
 
-## Part 4
+- Made a Python script `fetch_data.py` to fetch and upload API data to S3.
+- [Found a typo](https://github.com/DataUSA/datausa-site/pull/972) on the API page.
+
+> Save the result of this API call as a JSON file in S3.
+
+- Noticed that the `sync_data.py` script from part 1 would remove the JSON file in S3 since it doesn't exist on the first data source website, so I added an exception in `sync_data.py` for the object `population-data.json`.
+- Used packages `boto3` and `requests` to fetch the API data and upload it as a JSON file to S3.
+
+## Part 3: Data Analytics
+
+## Part 4: Infrastructure as Code & Data Pipeline with AWS CDK

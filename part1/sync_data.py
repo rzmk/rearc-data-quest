@@ -42,4 +42,5 @@ for link in soup.find_all("a"):
 
 # Remove files from S3 that are no longer on the website
 for file in deleted_list:
-  bucket.Object(file).delete()
+  if file != "population-data.json":
+    bucket.Object(file).delete()
