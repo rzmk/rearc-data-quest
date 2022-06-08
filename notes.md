@@ -76,4 +76,31 @@ Script logic:
 
 ## Part 3: Data Analytics
 
+### Step 0
+
+- Analyzed data with results in a Jupyter Notebook.
+- Used packages `pandas` and `requests` to load csv and json data. I noticed that for the part 2 dataframe I only needed the data section of the JSON file, so I learned to load the JSON file with [this StackOverflow answer](https://stackoverflow.com/a/62930034) and how to grab the specific nested data with [this article](https://towardsdatascience.com/how-to-convert-json-into-a-pandas-dataframe-100b2ae1e0d8).
+- Loaded data from S3 bucket. Had 403 errors when trying to load from the second data source on the original API.
+
+### Step 1
+
+- Filtered the population data within the [2013, 2018] inclusive year range ([reference](https://realpython.com/pandas-python-explore-dataset/#querying-your-dataset)).
+- Converted the `Years` column from an `object` `dtype` to `int` using `astype()` ([reference](https://stackoverflow.com/a/39216001)).
+- Used `mean()` and `std()` on the filtered dataframe's `Population` column.
+
+### Step 2
+
+- Used [`rename()`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.rename.html) to by removing whitespace in `series_id` and `value` original column names.
+- Used [`groupby()`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.groupby.html) and sorting values to remove all but the year with the max summed value for each series.
+
+### Step 3
+
+- Filtered series dataframe for the given `series_id` and `period`.
+- Extracted the population from the `population` dataframe and converted its `Year` column into an `int` type for merging.
+- Merged and filtered results for output, where population is displayed where it exists.
+
+### Step 4
+
+`data_analytics.ipynb` is located in the `part3` directory.
+
 ## Part 4: Infrastructure as Code & Data Pipeline with AWS CDK
