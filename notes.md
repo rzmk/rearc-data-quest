@@ -1,6 +1,6 @@
 # Rearc Data Quest
 
-The following are notes/steps I took when exploring [rearc-data/quest](https://github.com/rearc-data/quest). Note that I'm new to some of these technologies and procedures, and that some of these notes may be over-detailed but were useful for my reference while exploring the quest.
+The following are notes/steps I took when exploring [rearc-data/quest](https://github.com/rearc-data/quest). Note that I'm new to some of these technologies and procedures, and that some of these notes may be over-detailed but were useful for my reference while exploring the data quest.
 
 ## Part 1: AWS S3 & Sourcing Datasets
 
@@ -78,11 +78,15 @@ Script logic:
 
 ### Step 0
 
+> Load both the csv file from Part 1 pr.data.0.Current and the json file from Part 2 as dataframes (Spark, Pyspark, Pandas, Koalas, etc).
+
 - Analyzed data with results in a Jupyter Notebook.
 - Used packages `pandas` and `requests` to load csv and json data. I noticed that for the part 2 dataframe I only needed the data section of the JSON file, so I learned to load the JSON file with [this StackOverflow answer](https://stackoverflow.com/a/62930034) and how to grab the specific nested data with [this article](https://towardsdatascience.com/how-to-convert-json-into-a-pandas-dataframe-100b2ae1e0d8).
 - Loaded data from S3 bucket. Had 403 errors when trying to load from the second data source on the original API.
 
 ### Step 1
+
+> Using the dataframe from the population data API (Part 2), generate the mean and the standard deviation of the US population across the years [2013, 2018] inclusive.
 
 - Filtered the population data within the [2013, 2018] inclusive year range ([reference](https://realpython.com/pandas-python-explore-dataset/#querying-your-dataset)).
 - Converted the `Years` column from an `object` `dtype` to `int` using `astype()` ([reference](https://stackoverflow.com/a/39216001)).
@@ -90,10 +94,14 @@ Script logic:
 
 ### Step 2
 
+> Using the dataframe from the time-series (Part 1), For every series_id, find the best year: the year with the max/largest sum of "value" for all quarters in that year. Generate a report with each series id, the best year for that series, and the summed value for that year.
+
 - Used [`rename()`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.rename.html) to by removing whitespace in `series_id` and `value` original column names.
-- Used [`groupby()`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.groupby.html) and sorting values to remove all but the year with the max summed value for each series.
+- Used [`groupby()`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.groupby.html) and [sorting values to remove all but the year with the max summed value](https://stackoverflow.com/a/45999101) for each series.
 
 ### Step 3
+
+> Using both dataframes from Part 1 and Part 2, generate a report that will provide the value for series_id = PRS30006032 and period = Q01 and the population for that given year (if available in the population dataset).
 
 - Filtered series dataframe for the given `series_id` and `period`.
 - Extracted the population from the `population` dataframe and converted its `Year` column into an `int` type for merging.
@@ -101,6 +109,35 @@ Script logic:
 
 ### Step 4
 
+> Submit your analysis, your queries, and the outcome of the reports as a .ipynb file.
+
 `data_analytics.ipynb` is located in the `part3` directory.
 
 ## Part 4: Infrastructure as Code & Data Pipeline with AWS CDK
+
+- Before attempting this part, I went through the [ZTM Terraform course](https://zerotomastery.io/courses/learn-terraform-certification/) to learn more (i.e. using modules).
+- I also tried setting up the infrastructure within the AWS Management Console before attempting the IaC to base the code off of. This step involved referencing certain guides when encountering challenges such as:
+  - [Understanding how to integrate SQS with S3](https://www.youtube.com/watch?v=ZDHy3pwJnyo)
+
+### Step 0
+
+- Used Terraform for an automated data pipeline on AWS.
+
+### Step 1
+
+- Combined part 1 and part 2 scripts into one lambda function for daily API data sync with an S3 bucket for storage and access.
+- Used environment variables to get randomly generated S3 bucket names for updating S3 data by using the `os` package to get environment variables.
+- Created an EventBridge scheduled event that runs daily to trigger the lambda function for keeping data up to date. Followed [this reference article](https://openupthecloud.com/terraform-lambda-scheduled-event/).
+- Zipped required dependencies and script in `/part4/terraform_IaC/scripts`. For ease of viewing the actual script check `/part4/daily_lambda.py`.
+
+### Step 2
+
+- Set up an S3 event notification everytime `population-data.json` is updated/written to S3, which adds to an SQS queue. Followed [this reference in the Terraform Registry](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_notification#add-notification-configuration-to-sqs-queue).
+
+## Step 3
+
+- Set up a lambda function that runs data analysis on the stored data (based on part 3 Jupyter Notebook). Used environment variables for the S3 bucket name.
+- Zipped required dependencies and script in `/part4/terraform_IaC/scripts`. For ease of viewing the actual script check `/part4/analysis_lambda.py`.
+- Used [draw.io](https://draw.io/) just to visualize what the infrastructure looks like:
+
+![Data Quest AWS Infrastructure Diagram](diagram.png)
