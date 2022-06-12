@@ -134,7 +134,7 @@ Script logic:
 
 - Set up an S3 event notification everytime `population-data.json` is updated/written to S3, which adds to an SQS queue. Followed [this reference in the Terraform Registry](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_notification#add-notification-configuration-to-sqs-queue).
 
-## Step 3
+### Step 3
 
 - Set up a lambda function that runs data analysis on the stored data (based on part 3 Jupyter Notebook). Used environment variables for the S3 bucket name.
 - Zipped required dependencies and script in `/part4/terraform_IaC/scripts`. For ease of viewing the actual script check `/part4/analysis_lambda.py`.
